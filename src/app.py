@@ -49,6 +49,14 @@ def delete_member_family (member_id):
         return jsonify ({"msg": "familiar no encontrado"}), 400
     return jsonify ({"dome": "Familiar Borrado"})
 
+@app.route ('/member/<int:member_id>', methods =['PUT'] )
+def update_family_member (member_id): 
+    new_member = request.json
+    updated_member = jackson_family.update_member (member_id, new_member)
+    if not updated_member:
+        return jsonify ({"msg": "No se encontro al usuario"}), 400
+    return jsonify ("Mie")
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
