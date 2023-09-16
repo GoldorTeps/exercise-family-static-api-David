@@ -38,16 +38,35 @@ def handle_hello():
 
 @app.route ('/member', methods= ['POST'])
 def add_member (): 
-    new_member = request.json
-    jackson_family.add_member (new_member)
-    return jsonify ({"done": "usuario crerado"})
+    first_name = request.json.get("first_name")
+    lucky_numbers = request.json.get("lucky_numbers")
+    age = request.json.get("age")
+
+    if not first_name: 
+        return jsonify({'message': 'You must add a First Name'}), 400
+    if not lucky_numbers: 
+        return jsonify({'message': 'You must add an age'}), 400
+    if not age: 
+        return jsonify({'message': 'You must add Lucky Numbers'}), 400
+
+    new_family_member = {
+        "id": request.json.get('id') if request.json.get('id') is not None else jackson_family._generateId(),
+        "first_name": first_name,
+        "last_name": jackson_family.last_name,
+        "age": age,
+        "lucky_numbers": lucky_numbers
+    }
+
+    response = jackson_family.add_member(new_family_member)
+
+    return jsonify({'status': 'success', 'message': response})
 
 @app.route ('/member/<int:member_id>', methods = ['DELETE'])
 def delete_member_family (member_id): 
     eliminar_familiar = jackson_family.delete_member(member_id)
     if not eliminar_familiar: 
         return jsonify ({"msg": "familiar no encontrado"}), 400
-    return jsonify ({"dome": "Familiar Borrado"})
+    return jsonify ({"done": "Familiar Borrado"})
 
 @app.route ('/member/<int:member_id>', methods =['PUT'] )
 def update_family_member (member_id): 
@@ -55,7 +74,15 @@ def update_family_member (member_id):
     updated_member = jackson_family.update_member (member_id, new_member)
     if not updated_member:
         return jsonify ({"msg": "No se encontro al usuario"}), 400
-    return jsonify ("Mie")
+    return jsonify ({"done": "Miembro creado"})
+
+@app.route ('/member/<int:member_id>', methods = {'GET'})
+def get_one_member (member_id):
+    miembro_encontrado = jackson_family.get_member (member_id)
+    if not miembro_encontrado: 
+        return jsonify({"msg":"No se encontró al familiar"}), 400
+
+    return jsonify (miembro_encontrado), 200    
 
 
 # this only runs if `$ python src/app.py` is executed
