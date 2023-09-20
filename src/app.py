@@ -26,7 +26,7 @@ def sitemap():
     return generate_sitemap(app)
 
 @app.route('/members', methods=['GET'])
-def handle_hello():
+def get_all_members():
 
     # this is how you can use the Family datastructure by calling its methods
     members = jackson_family.get_all_members()
@@ -34,55 +34,49 @@ def handle_hello():
         "family": members
     }
 
-    return jsonify(response_body), 200
+    return jsonify(members), 200
 
 @app.route ('/member', methods= ['POST'])
 def add_member (): 
-    first_name = request.json.get("first_name")
-    lucky_numbers = request.json.get("lucky_numbers")
-    age = request.json.get("age")
-
-    if not first_name: 
-        return jsonify({'message': 'You must add a First Name'}), 400
-    if not lucky_numbers: 
-        return jsonify({'message': 'You must add an age'}), 400
-    if not age: 
-        return jsonify({'message': 'You must add Lucky Numbers'}), 400
-
-    new_family_member = {
-        "id": request.json.get('id') if request.json.get('id') is not None else jackson_family._generateId(),
-        "first_name": first_name,
-        "last_name": jackson_family.last_name,
-        "age": age,
-        "lucky_numbers": lucky_numbers
-    }
-
-    response = jackson_family.add_member(new_family_member)
-
-    return jsonify({'status': 'success', 'message': response})
+    member = request.json
+    jackson_family.add_member (member)
+    return jsonify(), 200
 
 @app.route ('/member/<int:member_id>', methods = ['DELETE'])
-def delete_member_family (member_id): 
-    eliminar_familiar = jackson_family.delete_member(member_id)
-    if not eliminar_familiar: 
-        return jsonify ({"msg": "familiar no encontrado"}), 400
-    return jsonify ({"done": "Familiar Borrado"})
+def delete_member (id): 
+    jackson_family.delete_member (id)
+    return jsonify ({"eliminado": True}), 200
 
-@app.route ('/member/<int:member_id>', methods =['PUT'] )
-def update_family_member (member_id): 
+@app.route ('/member/<int:id>', methods =['PUT'] )
+def update_family_member (id): 
     new_member = request.json
-    updated_member = jackson_family.update_member (member_id, new_member)
+    updated_member = jackson_family.update_member (id, new_member)
     if not updated_member:
         return jsonify ({"msg": "No se encontro al usuario"}), 400
     return jsonify ({"done": "Miembro creado"})
 
-@app.route ('/member/<int:member_id>', methods = {'GET'})
-def get_one_member (member_id):
-    miembro_encontrado = jackson_family.get_member (member_id)
-    if not miembro_encontrado: 
-        return jsonify({"msg":"No se encontró al familiar"}), 400
+@app.route ('/member/<int:id>', methods = {'GET'})
+def get_member (id):
+    member = jackson_family.get_member (id)
+    return jsonify (member), 200    
 
-    return jsonify (miembro_encontrado), 200    
+jackson_family.add_member ({
+    "name": "John",
+    "age": 33,
+    "luckyNumbers": [7, 13, 22]},
+    )
+jackson_family.add_member ({
+    "name": "Jane",
+    "age": 35,
+    "luckyNumbers": [10,14,3]},
+    )
+jackson_family.add_member ({            
+    "name": "Jimmy ",
+    "age": 5,
+    "luckyNumbers": [1]},
+)
+
+jackson_family.get_all_members ()
 
 
 # this only runs if `$ python src/app.py` is executed
